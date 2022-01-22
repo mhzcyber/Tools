@@ -1,0 +1,77 @@
+	• First of all import the modules:
+		○ . .\PowerView.ps1
+	• Get-NetDomain  (to get info about the AD Domain )
+	• Get-NetDomain -Domain moneycorp.local  (you can list the info about another domain if you have the priv)
+	• Get-DomainSID 
+	• Get-DomainPolicy
+		○ (Get-DomainPolicy)."system access" (the policy of system access)
+		○ (Get-DomainPolicy)."kerberos policy"
+		○ (Get-DomainPolicy -Domain moneycorp.local)."system access"
+	• Get-NetDomainController
+		○ Get-NetDomainController -Domain moneycorp.local
+	• Get-NetUser (get the users and their prosperities)
+		○ Get-NetUser | select cn (it's like get cn – cn=common name)
+		○ Get-NetUser –UserName student_name
+	• Get-UserProperty
+		○ Get-UserProperty –Properties badpwdcount
+		○ Get-UserProperty –Properties pwdlastset
+		○ Get-UserProperty –Properties logoncount
+	• Find-UserField –SearchField Description –SearchTerm "built" (search for word "built" in the users description)
+	• Get-NetComputer (list the computer names in the domain)
+		○ Get-NetComputer –FullData``
+		○ Get-NetComputer –OperatingSystem "*Server 2016*" (get the computers names that run server 2016)
+		○ Get-NetComputer –Ping (ping the computers)
+	• Get-NetGroup
+		○ Get-NetGroup –FullData
+		○ Get-NetGroup –Domain moneycrop.local
+		○ Get-NetGroup *admin* (Get all groups containing the word "admin" in group name)
+		○ Get-NetGroup -GroupName *admin* -Domain moneycorp.local [1]
+	• Get-NetGroupMember –GroupName "Domain admins" -Recurse [2]
+		○ Get-NetGroupMember -GroupName "Enterprise Admins" -Domain moneycorp.local
+	• Get-NetGroup -UserName "student_name"
+	• Get-NetLocalGroup -ComputerName dcorp-dc.dollarcorp.moneycorp.local -ListGroups (List all the local groups on a machine (needs administrator privs on non-dc machines))
+		○ Get-NetLocalGroup -ComputerName dcorp-dc.dollarcorp.moneycorp.local -Recurse
+
+	• Get-NetLoggedon –ComputerName <servername> (Get actively logged users on a computer (needs local admin rights on the target))
+	• Get-LoggedonLocal -ComputerName dcorp-dc.dollarcorp.moneycorp.local (Get locally logged users on a computer (needs remote registry on the target - started by-default on server OS))
+	• Get-LastLoggedOn –ComputerName <servername> (Get the last logged user on a computer (needs administrative rights and remote registry on the target))
+	• Invoke-ShareFinder – Verbose (Find shares on hosts in current domain - that doesn't mean u can access those shares, but high possible)
+		○ Invoke-ShareFinder -Verbose -ExcludeStandard -ExcludePrint –ExcludeIPC
+	• Invoke-FileFinder –Verbose (Find sensitive files on computers in the domain)
+	• Get-NetFileServer (Get all fileservers of the domain, it looks for a domain who a whole fileserver installed on them)
+	• Get-NetGPO (Get list of GPO in current domain.)
+		○ Get-NetGPO -ComputerName dcorp-std561.dollarcorp.moneycorp.local (Get info about a specific name and you can know which gpo applied on it)
+	•  Find-GPOComputerAdmin -Computername dcorp-std561.dollarcorp.moneycorp.local (
+	Get users which are in a local group of a machine using GPO)
+	• Find-GPOLocation -UserName student561 -Verbose (Get machines where the given user is member of a specific group)
+	• Get-NetOU (Get OUs in a domain)
+		○ Get-NetOU -Fulldata
+	• Get-NetGPO -GPOname "{C4F31C31-6258-4991-AAAD-454934E882AE}" (Get GPO applied on an OU. Read GPOname from gplink attribute from 
+	Get-NetOU)
+	• Get-ObjectAcl (get all acl)
+		○ Get-ObjectAcl -SamAccountName student561 -ResolveGUIDs (Get the ACLs
+		associated with the specified object)
+		
+		○ Get-ObjectAcl -ADSprefix 'CN=Administrator,CN=Users' -Verbose (Get the ACLs associated
+		with the specified prefix to be used for search)
+		○ Get-ObjectAcl -ADSpath "LDAP://CN=Domain Admins,CN=Users,DC=dollarcorp,DC=moneycorp,DC=local"
+		-ResolveGUIDs -Verbose (Get the ACLs associated with specified LDAP path to be used for search)
+	• Invoke-ACLScanner -ResolveGUIDs (search for interesting ACEs)
+	• Get-PathAcl -Path "\\dcorp-dc.dollarcorp.moneycorp.local\sysvol"
+	• Get-NetDomianTrust (Get a list of all domain trust for the current domain)
+		○ Get-NetDomainTrust -Domain us.dollarcorp.moneycorp.local
+	• Get-NetForestCatalog (Get all global catalogs for the current forest)
+		○ Get-NetForestCatalog -Forest europ.local
+	• Get-NetForestTrust (Map trusts of a forest)
+		○ Get-NetForestTrust -Forest eurocorp.local
+	• Find-LocalAdminAccess -verbose (Find all machines on the current domain where the current user has local admin access)
+	• Invoke-CheckLocalAdminAccess "dcorp-dc.dollarcorp.moneycorp.local"
+	• Find-WMILocalAdminAccess -ComputerFile .\ComputersNames.txt -Verbose
+	• Find-PSRemotingLocalAdminAccess
+	• Invoke-EnumerateLocalAdmin -Verbose (Find Local admins on all machines of the domain (needs administrator privs on non-dc machines))
+	• NetLocalGoup "dcorp-dc.dollarcorp.moneycorp.local"
+	• Get-NetSession/Get-NetLoggenon (get list sessions & logged on users)
+	• Invoke-UserHunter (Find computers where a domain admin(or specified user/group) has sessions)
+		○ Invoke-UserHunter -GroupName "RDPUsers"
+		○ Invoke-UserHunter -CheckAccess (confirm admin access)
+		○ Invoke-UserHunter -Stealth (Find computers where domain admin is logged-in)
